@@ -1,0 +1,34 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                cleanWs()
+                git branch: 'main', url: 'https://github.com/eliemedawar/Movie-app'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+
+                dir('Assignment 2') {
+                    bat 'docker build -t my-django-app:latest .'
+                }
+            }
+        }
+
+        stage('Stop Old Container') {
+            steps {
+               
+                bat 'docker rm -f my-django-app || exit /b 0'
+            }
+        }
+
+        stage('Run New Container') {
+            steps {
+                bat 'docker run -d --name my-django-app -p 8000:8000 my-django-app:latest'
+            }
+        }
+    }
+}
